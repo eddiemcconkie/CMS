@@ -1,0 +1,17 @@
+h3 {
+  font-weight: bold;
+  font-size: 2em;
+  margin-block: 1em;
+}
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.button-set {
+  display: flex;
+  gap: 0.5rem;
+}

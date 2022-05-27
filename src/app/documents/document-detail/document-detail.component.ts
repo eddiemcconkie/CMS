@@ -1,5 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { WindRefService } from 'src/app/wind-ref.service';
 import { Document } from '../document.model';
+import { DocumentService } from '../document.service';
 
 @Component({
   selector: 'cms-document-detail',
@@ -7,9 +10,31 @@ import { Document } from '../document.model';
   styleUrls: ['./document-detail.component.css'],
 })
 export class DocumentDetailComponent implements OnInit {
-  @Input() document: Document;
+  document: Document;
+  nativeWindow: Window;
 
-  constructor() {}
+  constructor(
+    private documentService: DocumentService,
+    private windowRefService: WindRefService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.nativeWindow = this.windowRefService.getNativeWindow();
+    this.route.params.subscribe((params) => {
+      this.document = this.documentService.getDocument(params.id);
+    });
+  }
+
+  onView() {
+    if (this.document.url) {
+      this.nativeWindow.open(this.document.url);
+    }
+  }
+
+  onDelete() {
+    this.documentService.deleteDocument(this.document);
+    this.router.navigate(['documents']);
+  }
 }

@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Document } from './document.model';
@@ -12,13 +13,36 @@ export class DocumentService {
   documents: Document[] = [];
   maxDocumentId: string;
 
-  constructor() {
+  constructor(private http: HttpClient) {
     this.documents = MOCKDOCUMENTS;
     this.maxDocumentId = this.getMaxId();
   }
 
-  getDocuments(): Document[] {
-    return this.documents.slice();
+  getDocuments() {
+    this.http
+      .get<Document[]>(
+        'https://wdd430-cms-7118c-default-rtdb.firebaseio.com/documents.json'
+      )
+      .subscribe({
+        next: (documents) => {
+          this.documents = documents;
+          this.maxDocumentId = this.getMaxId();
+          this.documents.sort((a, b) => (a.name > b.name ? 1 : -1));
+          this.documentChangedEvent.next(this.documents.slice());
+        },
+        error: (error) => console.log(error),
+      });
+  }
+
+  storeDocuments() {
+    this.http
+      .put(
+        'https://wdd430-cms-7118c-default-rtdb.firebaseio.com/documents.json',
+        this.documents
+      )
+      .subscribe(() => {
+        this.documentChangedEvent.next(this.documents.slice());
+      });
   }
 
   getDocument(id: string): Document {
@@ -30,7 +54,7 @@ export class DocumentService {
     const pos = this.documents.indexOf(document);
     if (pos < 0) return;
     this.documents.splice(pos, 1);
-    this.documentChangedEvent.next(this.documents.slice());
+    this.storeDocuments();
   }
 
   addDocument(newDocument: Document) {
@@ -38,7 +62,7 @@ export class DocumentService {
 
     newDocument.id = this.getNextId();
     this.documents.push(newDocument);
-    this.documentChangedEvent.next([...this.documents]);
+    this.storeDocuments();
   }
 
   updateDocument(originalDoc: Document, newDoc: Document) {
@@ -49,7 +73,7 @@ export class DocumentService {
 
     newDoc.id = originalDoc.id;
     this.documents.splice(index, 1, newDoc);
-    this.documentChangedEvent.next([...this.documents]);
+    this.storeDocuments();
   }
 
   getMaxId() {

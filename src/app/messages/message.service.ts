@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
 import { Message } from './message.model';
-import { MOCKMESSAGES } from './MOCKMESSAGES';
 
 @Injectable({
   providedIn: 'root',
@@ -12,34 +11,16 @@ export class MessageService {
   messages: Message[] = [];
   maxMessageId: string;
 
-  constructor(private http: HttpClient) {
-    this.messages = MOCKMESSAGES;
-  }
+  constructor(private http: HttpClient) {}
 
   getMessages() {
-    this.http
-      .get<Message[]>(
-        'https://wdd430-cms-7118c-default-rtdb.firebaseio.com/messages.json'
-      )
-      .subscribe({
-        next: (messages) => {
-          this.messages = messages;
-          this.maxMessageId = this.getMaxId();
-          this.messageChangedEvent.next(this.messages.slice());
-        },
-        error: (error) => console.log(error),
-      });
-  }
-
-  storeMessages() {
-    this.http
-      .put(
-        'https://wdd430-cms-7118c-default-rtdb.firebaseio.com/messages.json',
-        this.messages
-      )
-      .subscribe(() => {
+    this.http.get<Message[]>('http://localhost:3000/messages').subscribe({
+      next: (messages) => {
+        this.messages = messages;
         this.messageChangedEvent.next(this.messages.slice());
-      });
+      },
+      error: (error) => console.log(error),
+    });
   }
 
   getMessage(id: string): Message {
@@ -47,19 +28,11 @@ export class MessageService {
   }
 
   addMessage(message: Message) {
-    this.messages.push(message);
-    this.storeMessages();
-  }
-
-  getMaxId() {
-    return this.messages.reduce(
-      (maxId, document) => (+document.id > +maxId ? document.id : maxId),
-      '0'
-    );
-  }
-
-  getNextId() {
-    this.maxMessageId = `${+this.maxMessageId + 1}`;
-    return this.maxMessageId;
+    this.http
+      .post<{ message: Message }>('http://localhost:3000/messages', message)
+      .subscribe(({ message }) => {
+        this.messages.push(message);
+        this.messageChangedEvent.next(this.messages.slice());
+      });
   }
 }

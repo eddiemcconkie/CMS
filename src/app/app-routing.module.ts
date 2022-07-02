@@ -5,6 +5,7 @@ import { ContactEditComponent } from './contacts/contact-edit/contact-edit.compo
 import { ContactsComponent } from './contacts/contacts.component';
 import { DocumentDetailComponent } from './documents/document-detail/document-detail.component';
 import { DocumentEditComponent } from './documents/document-edit/document-edit.component';
+import { DocumentResolverService } from './documents/document-resolver.service';
 import { DocumentsComponent } from './documents/documents.component';
 import { MessageListComponent } from './messages/message-list/message-list.component';
 
@@ -15,8 +16,16 @@ const appRoutes: Routes = [
     component: DocumentsComponent,
     children: [
       { path: 'new', component: DocumentEditComponent },
-      { path: ':id', component: DocumentDetailComponent },
-      { path: ':id/edit', component: DocumentEditComponent },
+      {
+        path: ':id',
+        component: DocumentDetailComponent,
+        resolve: { document: DocumentResolverService },
+      },
+      {
+        path: ':id/edit',
+        component: DocumentEditComponent,
+        resolve: { document: DocumentResolverService },
+      },
     ],
   },
   { path: 'messages', component: MessageListComponent },

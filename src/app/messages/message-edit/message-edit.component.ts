@@ -11,7 +11,7 @@ export class MessageEditComponent implements OnInit {
   @ViewChild('subject') subject: ElementRef;
   @ViewChild('msgText') msgText: ElementRef;
 
-  currentSender = 'Eddie McConkie';
+  currentSenderId = '101';
 
   constructor(private messageService: MessageService) {}
 
@@ -24,7 +24,7 @@ export class MessageEditComponent implements OnInit {
       '4',
       subjectValue,
       msgTextValue,
-      this.currentSender
+      this.currentSenderId
     );
     this.messageService.addMessage(message);
 
